@@ -1,0 +1,51 @@
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  creationTimestamp: null
+  labels:
+    run: fritzbox-backup
+  name: fritzbox-backup
+  namespace: shared
+spec:
+  concurrencyPolicy: Allow
+  jobTemplate:
+    metadata:
+      creationTimestamp: null
+    spec:
+      template:
+        metadata:
+          creationTimestamp: null
+          labels:
+            run: fritzbox-backup
+        spec:
+          containers:
+            - image: registry.gitlab.com/michaelstefanschmitz/fritzbox-backup:master
+              name: fritzbox-backup
+              # Debug command
+              # command: ["sleep", "1000000"]
+              imagePullPolicy: Always
+              env:
+                - name: FritzBox_HOST
+                  value: "fritz.box"
+                - name: FritzBox_PREFIX
+                  value: "GER-"
+                - name: FritzBox_USER
+                  value: "foo"
+                - name: FritzBox_PASS
+                  value: "bar"
+                # Leave out all lines underneath if you don't want to upload to any s3
+                - name: S3_HOST
+                  value: "s3.hostname.tld"
+                - name: S3_BUCKET
+                  value: "fritzbox"
+                  # Example!!!
+                - name: S3_KEY
+                  value: "1OG8WS2W7FQVXBG0QH8M"
+                  # Example!!!
+                - name: S3_SECRET
+                  value: "3ZlznVlGdkwb1Nx0PpcyrpbrBAwQJ9cP"
+              resources: {}
+          restartPolicy: Never
+  schedule: '0 1 * * *'
+  successfulJobsHistoryLimit: 4
