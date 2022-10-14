@@ -24,6 +24,8 @@ Tested on a 7490 with OS 7.11
 Options:
 -h, --help              display this usage message and exit
     --host              host/ip of the fritz.box [fritz.box]
+    --port              port of the fritz.box [80]
+    --scheme            wether to use http or https [http]
     --username          username to login, empty for admin [""]
     --password          password to login [""]
     --export-password   password for the config export file [""]
@@ -34,6 +36,8 @@ EOF
 }
 
 host="fritz.box"
+port="80"
+scheme="http"
 username=""
 password=""
 export_password=""
@@ -63,6 +67,14 @@ while [ $# -gt 0 ] ; do
         host="$2"
         shift
         ;;
+    --port)
+        port="$2"
+        shift
+        ;;
+    --scheme)
+        scheme="$2"
+        shift
+        ;;
     -*)
         usage "Unknown option '$1'"
         ;;
@@ -71,7 +83,7 @@ while [ $# -gt 0 ] ; do
     shift
 done
 
-challenge=$(curl -s http://${host}/login_sid.lua |  grep -o "<Challenge>[a-z0-9]\{8\}" | cut -d'>' -f 2)
+challenge=$(curl -s ${scheme}://${host}:${port}/login_sid.lua |  grep -o "<Challenge>[a-z0-9]\{8\}" | cut -d'>' -f 2)
 
 if [ -z "${challenge}" ] ; then
     echo "[ERROR] login failed"
@@ -79,7 +91,7 @@ if [ -z "${challenge}" ] ; then
 fi
 
 hash=$(echo -n "${challenge}-${password}" |sed -e 's,.,&\n,g' | tr '\n' '\0' | md5sum | grep -o "[0-9a-z]\{32\}")
-avmsid=$(curl -s "http://${host}/login_sid.lua" -d "response=${challenge}-${hash}" -d 'username='${username} | grep -o "<SID>[a-z0-9]\{16\}" |  cut -d'>' -f 2)
+avmsid=$(curl -s "${scheme}://${host}:${port}/login_sid.lua" -d "response=${challenge}-${hash}" -d 'username='${username} | grep -o "<SID>[a-z0-9]\{16\}" |  cut -d'>' -f 2)
 
 if [ -z "${avmsid}" ] || [ "${avmsid}" = "0000000000000000" ]; then
     echo "[ERROR] login failed"
@@ -91,4 +103,4 @@ curl -s -k \
     --form 'sid='${avmsid} \
     --form 'ImportExportPassword='${export_password} \
     --form 'ConfigExport=' \
-    http://${host}/cgi-bin/firmwarecfg
+    ${scheme}://${host}:${port}/cgi-bin/firmwarecfg

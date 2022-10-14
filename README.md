@@ -1,27 +1,16 @@
-# fritz.box backup
+# Fritz!Box Backup
 
-Backup your fritz.box configuration.
+## Source
+
+https://github.com/hendrikmaus/fritzbox-backup
+
+## Enhancements
+
+Script was put inside simple Docker container to be easily deployable as Cronjob in Kubernetes.
+Also S3 Upload is optional.
 
 ## Usage
 
 _Tested on Linux._
 
-```sh
-$ ./fritzbox-backup-export.sh --help
-
-Usage: fritzbox-backup-export.sh [OPTION ...]
-
-Export fritz.box configuration file.
-
-Tested on a 7490 with OS 7.11
-
-Options:
--h, --help              display this usage message and exit
-    --host              host/ip of the fritz.box [fritz.box]
-    --username          username to login, empty for admin [""]
-    --password          password to login [""]
-    --export-password   password for the config export file [""]
-    --path              path to write the export file to, stdout if omitted
-```
-
-Please see the included example file. You can adjust the parameters and test it in place.
+Please see the included example files. You can adjust the parameters and test it in place or deploy to kubernetes
